@@ -486,13 +486,13 @@ static te_expr *fatorial(state *s) {
 
 
 static te_expr *term(state *s) {
-    /* <fatorial>      =    <factor> {("!") <factor>} */
-    te_expr *ret = factorial(s);
+    /* <term>      =    <factorial> {("!") <fatorial>} */
+    te_expr *ret = fatorial(s);
 
     while (s->type == TOK_INFIX && (s->function == mul || s->function == divide || s->function == fmod)) {
         te_fun2 t = s->function;
         next_token(s);
-        ret = NEW_EXPR(TE_FUNCTION2 | TE_FLAG_PURE, ret, factorial(s));
+        ret = NEW_EXPR(TE_FUNCTION2 | TE_FLAG_PURE, ret, fatorial(s));
         ret->function = t;
     }
 
@@ -666,4 +666,12 @@ static void pn (const te_expr *n, int depth) {
 
 void te_print(const te_expr *n) {
     pn(n, 0);
+}
+
+int main(int argc, char *argv[])
+{
+    const char *c = "3+5!*2+sin(3.14)"; 
+    double r = te_interp(c, 0);
+    printf("The expression:\n\t%s\nevaluates to:\n\t%f\n", c, r);
+    return 0;
 }
